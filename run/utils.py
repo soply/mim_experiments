@@ -86,11 +86,6 @@ def load_data_set(dataset, path_to_source):
 
 def load_estimator(estimator_kwargs, path_to_source):
     """
-    Loads a specific estimator. Path to source should contain source code for
-    the nsim algorithm ("github.com/soply/nsim_algorithm"), simple estimators ("github.com/soply/simple_estimation")
-    and ELM "github.com/dclambert/Python-ELM". Other estimators
-    can be added flexible.
-
     Parameters
     ------------
     estimator_kwargs : dict
@@ -99,54 +94,8 @@ def load_estimator(estimator_kwargs, path_to_source):
     path_to_source : string
         Folder where source code for other estimators is hosted.
     """
-    name = estimator_kwargs['estimator']
-    copy_dict = copy.deepcopy(estimator_kwargs)
-    del copy_dict['estimator']
-    if name == 'SIRKnn':
-        sys.path.insert(0, path_to_source + '/simple_estimation/')
-        from simple_estimation.estimators.SIRKnn import SIRKnn
-        estim = SIRKnn(**copy_dict)
-    elif name == 'MIM_LR_kNN':
-    	sys.path.insert(0, path_to_source + '/mim_estimator/')
-    	from mim_estimator.estimator import MIM_LinReg_kNN_Estimator
-        estim = MIM_LinReg_kNN_Estimator(**copy_dict)
-    elif name == 'MIM_SSV_kNN':
-    	sys.path.insert(0, path_to_source + '/mim_estimator/')
-    	from mim_estimator.estimator import MIM_SSV_kNN_Estimator
-        estim = MIM_SSV_kNN_Estimator(**copy_dict)
-    elif name == 'SAVEKnn':
-        sys.path.insert(0, path_to_source + '/simple_estimation/')
-        from simple_estimation.estimators.SAVEKnn import SAVEKnn
-        estim = SAVEKnn(**copy_dict)
-    elif name == 'PHDKnn':
-        sys.path.insert(0, path_to_source + '/simple_estimation/')
-        from simple_estimation.estimators.PHDKnn import PHDKnn
-        estim = PHDKnn(**copy_dict)
-    elif name == 'nsim':
-        sys.path.insert(0, path_to_source + '/nsim_algorithm/')
-        from nsim_algorithm.estimator import NSIM_Estimator
-        estim = NSIM_Estimator(**copy_dict)
-    elif name == 'knn':
-        from sklearn.neighnors import KNeighborsRegressor
-        estim = KNeighborsRegressor()
-    elif name == 'linreg':
-        from sklearn.linear_model import LinearRegression
-        estim = LinearRegression()
-    elif name == 'isotron':
-        sys.path.insert(0, path_to_source + '/simple_estimation/')
-        from simple_estimation.estimators.Isotron import IsotronCV
-        estim = IsotronCV(**copy_dict)
-    elif name == 'slisotron':
-        sys.path.insert(0, path_to_source + '/simple_estimation/')
-        from simple_estimation.estimators.Slisotron import SlisotronCV
-        estim = SlisotronCV(**copy_dict) # Super slow implementation
-    elif name == 'elm':
-        sys.path.insert(0, path_to_source + '/Python-ELM/')
-        from elm import ELMRegressor
-        estim = ELMRegressor(**copy_dict)
-    elif name == 'ffnn':
-        from simple_estimation.estimators.FeedForwardNetwork import FeedForwardNetwork
-        estim = FeedForwardNetwork(**copy_dict)
-    else:
-        raise NotImplementedError('Load estimator: Estimator does not exist.')
-    return estim
+    # name = estimator_kwargs['estimator']
+    # copy_dict = copy.deepcopy(estimator_kwargs)
+    sys.path.insert(0, path_to_source + '/sdr_toolbox_dev/')
+    from sdr_toolbox.sdrknn import SDRKnn
+    return SDRKnn(n_neighbors = 1, n_components = 1, n_levelsets = 1, **estimator_kwargs)

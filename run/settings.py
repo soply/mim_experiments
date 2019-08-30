@@ -21,7 +21,7 @@ def get_settings(dataset):
     elif dataset == 'auto_mpg':
         arguments = {
             'dataset' : 'auto_mpg', # Data set identifier
-            'n_test_sets' : 1, # number of repititions of the experiment
+            'n_test_sets' : 20, # number of repititions of the experiment
             'test_size' : 0.15, # size of the test set
             'cv_folds' : 5, # CV is used for parameter choices
             "param_grid": {
@@ -112,6 +112,18 @@ def get_settings(dataset):
                 "n_neighbors": np.arange(5,92,3).tolist(),
                 "n_levelsets": [1,2,3,4,5,6,7,8,9,10],
                 "n_components" : [1,2,3],
+            },
+        }
+    elif dataset == 'airfoil':
+        arguments = {
+            'dataset' : 'airfoil', # Data set identifier
+            'n_test_sets' : 20, # number of repititions of the experiment
+            'test_size' : 0.15, # size of the test set
+            'cv_folds' : 5, # CV is used for parameter choices
+            "param_grid": {
+                "n_neighbors": np.arange(1,20).tolist(),
+                "n_levelsets": [2,4,6,8,10,12,14,16],
+                "n_components" : [1,2,3,4,5],
             },
         }
     return arguments

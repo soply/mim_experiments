@@ -40,7 +40,6 @@ def run_experiment(arguments):
     test_iter = 0
     computational_time = np.zeros(n_test_sets)
     # Extra array to store dot products if estimator is nsim
-    almost_linearity_param = np.zeros(n_test_sets)
     for idx_train, idx_test in kf.split(X):
         start = time.time()
         reg = GSCV(estimator = estim, param_grid = param_grid,
@@ -55,15 +54,11 @@ def run_experiment(arguments):
         Y_predict = reg.best_estimator_.predict(X_test)
         end = time.time()
         best_parameters[test_iter] = reg.best_params_
-        if arguments['estimator_kwargs']['estimator'] in ['isotron', 'slisotron']:
-            best_parameters[test_iter] = reg.best_estimator_.n_iter_cv()
         if log_tf:
             test_error[test_iter] = np.sqrt(mean_squared_error(np.exp(Y_test), np.exp(Y_predict)))
         else:
             test_error[test_iter] = np.sqrt(mean_squared_error(Y_test, Y_predict))
         computational_time[test_iter] = end - start
-        if arguments['estimator_kwargs']['estimator'] == 'nsim':
-            almost_linearity_param[test_iter] = reg.best_estimator_.measure_almost_linearity()
         test_iter += 1
         print best_parameters
         print test_error
@@ -71,8 +66,7 @@ def run_experiment(arguments):
     mean_error = np.mean(test_error)
     std_error = np.std(test_error)
     mean_computational_time = np.mean(computational_time)
-    mean_almost_linearity_param = np.mean(almost_linearity_param)
-    filename = arguments['filename']
+    filename = arguments['filename_base'] + '/' + arguments['dataset'] + '/' + arguments['estimator_kwargs']['method']
     filename_mod = filename
     save_itr = 0
     while os.path.exists('../results/' + filename_mod + '/'):
@@ -86,13 +80,12 @@ def run_experiment(arguments):
         np.savetxt('../results/' + filename_mod + '/computational_time_summary.txt', [mean_computational_time])
         np.savetxt('../results/' + filename_mod + '/test_errors_summary.txt', np.array([mean_error, std_error]))
         np.save('../results/' + filename_mod + '/best_params.npy', best_parameters)
-        if arguments['estimator_kwargs']['estimator'] == 'nsim':
-            np.savetxt('../results/' + filename_mod + '/almost_linearity_param.txt', almost_linearity_param)
-            np.savetxt('../results/' + filename_mod + '/almost_linearity_summary.txt', [mean_almost_linearity_param])
         with open('../results/' + filename_mod + '/best_params_json.txt', 'w') as file:
             file.write(json.dumps(best_parameters, indent=4))
         with open('../results/' + filename_mod + '/log.txt', 'w') as file:
             file.write(json.dumps(arguments, indent=4))
+    import pdb 
+    pdb.set_trace()
 
 
 
@@ -105,17 +98,20 @@ if __name__ == '__main__':
         n_jobs = 1 # Default 1 jobs
     print 'Using n_jobs = {0}'.format(n_jobs)
     # Data set
-    datasets = ['boston','auto_mpg','concrete','ames','istanbul','airquality','skillcraft',
-                'yacht','EUStockExchange']
-    for dataset in datasets:
-        arguments = get_settings(dataset)
-        arguments.update({
-            'filename' : dataset + '_mim_LR_1', # Name to store results
-            'dataset' : dataset, # Data set identifier
-            'n_jobs' : n_jobs, # number of jobs to run in cv mode
-            'estimator_kwargs' : { # Estimator details, content depends on the estimator
-                "estimator": "MIM_LR_kNN",
-                "split_by" : "stateq",
-            },
-        })
-        run_experiment(arguments)
+    datasets = ['airquality', 'boston', 'concrete', 'ames', 'skillcraft', 'yacht']
+    methods = ['SIR', 'SIRII', 'SAVE', 'DR', 'PHD', 'RCLR', 'PHD']
+    for method in methods:
+        for dataset in datasets:
+            arguments = get_settings(dataset)
+            arguments.update({
+                'filename_base' : 'test_1', # Name to store results
+                'n_jobs' : n_jobs, # number of jobs to run in cv mode
+                'estimator_kwargs' : { # Estimator details, content depends on the estimator
+                    "method" : method,
+                    "split_by" : "dyadic",
+                    "use_residuals" : False,
+                    "whiten" : False,
+                    "rescale" : False
+                },
+            })
+            run_experiment(arguments)
